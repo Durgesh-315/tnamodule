@@ -268,35 +268,41 @@ public class TnaTitleCntrl extends HttpServlet {
 		 * =request.getRequestDispatcher("successPage.jsp"); rd1.forward(request,
 		 * response); }
 		 */
-		// Controller action method 
 		else if (page.equals("tnaForm1")) {
-			int orderNo = Integer.parseInt(request.getParameter("orderNo"));  // Get current orderNo from the request
+		    int orderNo = Integer.parseInt(request.getParameter("orderNo"));  // Get current orderNo from the request
 
-		    
 		    // Handle the Previous button operation
 		    if (opr.equals("previous")) {
-		    	if(orderNo ==1) {
-		    		String email = (String)request.getSession().getAttribute("userId");
-		    		TnaTitle userRecord = tnaTitleDBService.getTnaUserDetailByEmail(email);
-		    		request.setAttribute("userRecords", userRecord);
-		    	
-		    		rd = request.getRequestDispatcher("tnaForm.jsp");
-		            rd.forward(request, response);
-		    	}
-		    	else if (orderNo>1) {
-		        orderNo--;  
-		    	}// Decrease orderNo for the previous page
+		        if (orderNo == 1) {
+		            String email = (String) request.getSession().getAttribute("userId");
+		            TnaTitle userRecord = tnaTitleDBService.getTnaUserDetailByEmail(email);
+		            request.setAttribute("userRecords", userRecord);
+
+		            rd = request.getRequestDispatcher("tnaForm.jsp");
+		            if (!response.isCommitted()) {
+		                rd.forward(request, response);
+		            } else {
+		                System.out.println("Response already committed, cannot forward!");
+		            }
+		        } else if (orderNo > 1) {
+		            orderNo--;  // Decrease orderNo for the previous page
+		        }
 		    }
 
 		    // Retrieve form data
 		    if (opr.equals("saveNext")) {
-		    	if(orderNo ==9) {
-		    		rd = request.getRequestDispatcher("tnaForm2.jsp?orderNo=10");
-		            rd.forward(request, response);
-		    	}
-		    	else {
-		    	 orderNo++;
-		    	}
+		        int maxorderNo = tnaTitleDBService.getTnaMaxOrder();
+		        if (orderNo == (maxorderNo - 1)) {
+		            rd = request.getRequestDispatcher("tnaForm2.jsp?orderNo=" + maxorderNo);
+		            if (!response.isCommitted()) {
+		                rd.forward(request, response);
+		            } else {
+		                System.out.println("Response already committed, cannot forward!");
+		            }
+		        } else {
+		            orderNo++;
+		        }
+
 		        // Initialize a map to hold ID and choice pairs
 		        Map<Integer, String> choicesMap = new HashMap<>();
 
@@ -352,16 +358,22 @@ public class TnaTitleCntrl extends HttpServlet {
 
 		    // Redirect or forward after successful operation
 		    RequestDispatcher rd1 = request.getRequestDispatcher("tnaForm1.jsp?orderNo=" + orderNo);
-		    rd1.forward(request, response);
+		    if (!response.isCommitted()) {
+		        rd1.forward(request, response);
+		    } else {
+		        System.out.println("Response already committed, cannot forward!");
+		    }
 		}
+
 		else if (page.equals("tnaForm2")) {
 		    int orderNo = Integer.parseInt(request.getParameter("orderNo"));  // Get current orderNo from the request
 
 		    // Handle the Previous button operation
 		    if (opr.equals("previous")) {
-		        if (orderNo == 10) {
+		    	 int maxorderNo = tnaTitleDBService.getTnaMaxOrder();
+		        if (orderNo == maxorderNo) {
 		            // Navigate to the previous form
-		            rd = request.getRequestDispatcher("tnaForm1.jsp?orderNo=9");
+		            rd = request.getRequestDispatcher("tnaForm1.jsp?orderNo="+(maxorderNo-1));
 		            rd.forward(request, response);
 		        } else if (orderNo > 1) {
 		            orderNo--;  // Decrease orderNo for the previous page

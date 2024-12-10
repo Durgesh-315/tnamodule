@@ -340,6 +340,30 @@ tnaTitle.setStateValue(rs.getString("state")==null?"":getValue(rs.getString("sta
 	    
 	    return catId;
 	}
+	public int getTnaMaxOrder() {
+	    int maxOrder = 0;
+	    String query = "SELECT MAX(orderNo) AS maxOrder FROM dd_train_cat WHERE flag = 'yes'";
+
+	    System.out.println(query); // Log the query for debugging
+	    try (Statement stmt = con.createStatement();
+	         ResultSet rs = stmt.executeQuery(query)) {
+
+	        if (rs.next()) { // Check if a result is available
+	            maxOrder = rs.getInt("maxOrder"); // Use column alias for clarity
+	        }
+
+	    } catch (SQLException e) {
+	        System.out.println("SQL Error: " + e.getMessage());
+	        e.printStackTrace();
+	    } catch (Exception e) {
+	        System.out.println("Error: " + e.getMessage());
+	        e.printStackTrace();
+	    }
+
+	    return maxOrder;
+	}
+
+
 	public int getNextTnaCatId(int currentId)
 	{
 		int catId=0;
